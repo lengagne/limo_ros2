@@ -2,8 +2,8 @@
 
 <robot name="limo_four_diff" xmlns:xacro="http://ros.org/wiki/xacro">
 
-    <xacro:include filename="$(find limo_description)/urdf/limo_xacro.xacro" />
-    <!-- <xacro:include filename="$(find limo_description)/urdf/limo_four_diff_2.gazebo" /> -->
+    <xacro:include filename="$(find limo_simulation)/urdf/limo_xacro.xacro" />
+    <!-- <xacro:include filename="$(find limo_simulation)/urdf/limo_four_diff_2.gazebo" /> -->
 
     <!-- Variables -->
     <xacro:property name="M_PI" value="3.14159"/>
@@ -32,7 +32,7 @@
         <visual>
 <!--            <origin xyz="0 0 -0.15" rpy="0 0 1.57" />
             <geometry>
-                <mesh filename="file://$(find limo_description)/meshes/limo_base.dae" scale="1 1 1"/>
+                <mesh filename="file://$(find limo_simulation)/meshes/limo_base.dae" scale="1 1 1"/>
             </geometry>-->
             <origin xyz="0 0 0" rpy="0 0 0" />
           <geometry>
