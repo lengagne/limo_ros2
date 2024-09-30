@@ -15,13 +15,13 @@ def generate_launch_description():
   package_name = 'limo_simulation'
   robot_name_in_model = 'limo_simulation'
   urdf_file_path = 'urdf/limo_four_diff.xacro'
-  world_file_path = 'worlds/labyrinthe1.world'
+  world_file_path = 'worlds/synthese.world'
  
   # Pose where we want to spawn the robot
-  spawn_x_val = '0.0'
-  spawn_y_val = '1.0'
+  spawn_x_val = '3.0'
+  spawn_y_val = '-3.0'
   spawn_z_val = '0.0'
-  spawn_yaw_val = '1.57'
+  spawn_yaw_val = '3.14'
  
   ############ You do not need to change anything below this line #############
  
