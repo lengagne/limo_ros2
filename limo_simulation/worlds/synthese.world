@@ -404,7 +404,7 @@
         <gravity>1</gravity>
       </link>
       <static>1</static>
-    </model>
+    </model>-->
     <model name='Stop Sign_1'>
       <link name='link'>
         <collision name='collision'>
