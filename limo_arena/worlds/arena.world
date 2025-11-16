@@ -9,6 +9,25 @@
     <include>
       <uri>model://ground_plane</uri>
     </include>
+    
+        <!-- Plugin pour publier les états des modèles -->
+    <plugin filename="libgazebo_ros_state.so" name="gazebo_ros_state">
+      <ros>
+        <namespace>/gazebo</namespace>
+        <remapping>~/model_states:=/model_states</remapping>
+      </ros>
+      <update_rate>30.0</update_rate>
+      <publish_link_pose>true</publish_link_pose>
+      <publish_model_pose>true</publish_model_pose>
+      <publish_tf>true</publish_tf>
+    </plugin>
+
+    <!-- Plugin pour activer les services de spawn et suppression -->
+    <plugin filename="libgazebo_ros_factory.so" name="gazebo_ros_factory">
+      <ros>
+        <namespace>/gazebo</namespace>
+      </ros>
+    </plugin>
 
     <!-- Arène : 4 murs de 3m de long et 0.4m de haut -->
     <model name="arena_walls">

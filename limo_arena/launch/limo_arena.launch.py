@@ -120,7 +120,15 @@ def generate_launch_description():
                     output='screen')
  
   # Create the launch description and populate
-  ld = LaunchDescription()
+  ld = LaunchDescription([
+      
+        Node(
+      package=package_name_arena,
+      executable='referee',
+      name='referee')
+      
+      
+      ])
  
   # Declare the launch options
   ld.add_action(declare_use_sim_time_cmd)
@@ -138,5 +146,8 @@ def generate_launch_description():
   ld.add_action(spawn_entity_cmd)
   ld.add_action(start_robot_state_publisher_cmd)
   # ld.add_action(start_dummy_sensors)
+  
+
+      
  
   return ld
