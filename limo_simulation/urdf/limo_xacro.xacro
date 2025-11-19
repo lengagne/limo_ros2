@@ -53,6 +53,7 @@
                     <cylinder radius="0.02" length="0.01"/>
                 </geometry>
                 <material name='laser_material'>
+                    <color rgba="1 0 0 1"/>
                     <ambient>0.1 0.1 0.1 1</ambient>
                     <diffuse>0.1 0.1 0.2 1</diffuse>
                     <specular>0 0 0 0</specular>
@@ -94,6 +95,7 @@
                     <box size="0.02 0.06 0.015"/>
                 </geometry>
                 <material name='depth_camera_material'>
+                    <color rgba="0 1 0 1"/>
                     <ambient>0.1 0.1 0.1 1</ambient>
                     <diffuse>0.1 0.1 0.2 1</diffuse>
                     <specular>0 0 0 0</specular>
@@ -145,6 +147,7 @@
                     <box size="0.001 0.001 0.001"/>
                 </geometry>
                 <material name='imu_material'>
+                    <color rgba="0 0 1 1"/>
                     <ambient>0.1 0.1 0.1 1</ambient>
                     <diffuse>0.1 0.1 0.2 1</diffuse>
                     <specular>0 0 0 0</specular>
