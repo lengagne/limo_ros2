@@ -52,6 +52,14 @@ def generate_launch_description():
             description='z orientation of the robot'
         )
     )
+
+    ld.add_action(
+        DeclareLaunchArgument(
+            name='env_pkg',
+            default_value='limo_simulation',
+            description='package of the environment'
+        )
+    )
     
 
     # Constants for paths to different files and folders
@@ -65,14 +73,14 @@ def generate_launch_description():
     spawn_y_val = LaunchConfiguration('spawn_y_val')   
     spawn_z_val = LaunchConfiguration('spawn_z_val')   
     spawn_yaw_val = LaunchConfiguration('spawn_yaw_val')   
+    env_pkg = LaunchConfiguration('env_pkg')
 
     # Set the path to different files and folders
     pkg_gazebo_ros = FindPackageShare(package='gazebo_ros')
     pkg_share = FindPackageShare(package=package_name)
+    pkg_env_share = FindPackageShare(package=env_pkg)
     default_urdf_model_path = os.path.join(pkg_share.find(package_name), urdf_file_path)
-    #world_path = os.path.join(pkg_share.find(package_name), LaunchConfiguration('environnement_path'))
-    
-    world_path = PathJoinSubstitution(     [pkg_share, LaunchConfiguration('environnement_path')] )
+    world_path = PathJoinSubstitution(     [pkg_env_share, LaunchConfiguration('environnement_path')] )
     
     gazebo_models_path_full = os.path.join(pkg_share.find(package_name), gazebo_models_path)
     os.environ["GAZEBO_MODEL_PATH"] = gazebo_models_path_full
