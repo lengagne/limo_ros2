@@ -16,7 +16,7 @@
     <xacro:property name="wheelbase" value="0.2"/>
     <xacro:property name="track" value="0.13"/>
     <xacro:property name="wheel_vertical_offset" value="-0.10" />
-    <xacro:property name="base_mass" value="2.1557"/>
+    <xacro:property name="base_mass" value="4.8"/>
 
     <xacro:property name="wheel_length" value="0.045" />
     <xacro:property name="wheel_radius" value="0.045" />
@@ -43,7 +43,8 @@
             <!--origin xyz="0 0 -0.15" rpy="0 0 1.57" /-->
             <origin xyz="0 0 0" rpy="0 0 0" />
           <geometry>
-              <box size="${base_x_size} ${base_y_size} ${base_z_size}"/>
+              <!--<box size="${base_x_size} ${base_y_size} ${base_z_size}"/>-->
+            <box size="0.322 0.22 0.251"/>
           </geometry>
         </collision>
     </link>
@@ -52,9 +53,9 @@
         <inertial>
             <origin xyz="0.0 0.0 0.0" />
             <mass value="${base_mass}" />
-            <inertia ixx="0.24" ixy="0" ixz="0" 
-                     iyy="0.96" iyz="0" 
-                     izz="0.96" />
+            <inertia ixx="0.44" ixy="0" ixz="0"
+                     iyy="0.66" iyz="0"
+                     izz="0.6" />
         </inertial>
     </link>
 
@@ -262,7 +263,7 @@
         <right_joint>rear_right_wheel </right_joint>
         <wheel_separation>0.172</wheel_separation>
         <wheel_diameter>0.09</wheel_diameter>
-        <max_wheel_torque>20</max_wheel_torque>
+        <max_wheel_torque>10</max_wheel_torque>
         <max_wheel_acceleration>1.0</max_wheel_acceleration>
         <command_topic>cmd_vel</command_topic>
         <publish_odom>true</publish_odom>

@@ -50,16 +50,16 @@ def generate_launch_description():
         }.items()
     )
 
-    # Add referee
-    referee_node = Node(
-        package=package_name,  # Remplace par le nom du package contenant le nœud referee
-        executable='referee',  # Remplace par le nom de l'exécutable du nœud referee
-        name='referee',
-        output='screen',  # Affiche la sortie du nœud dans le terminal
-    )
+    ## Add referee
+    #referee_node = Node(
+        #package=package_name,  # Remplace par le nom du package contenant le nœud referee
+        #executable='referee',  # Remplace par le nom de l'exécutable du nœud referee
+        #name='referee',
+        #output='screen',  # Affiche la sortie du nœud dans le terminal
+    #)
 
     ld.add_action(simulation_launch)
     ld.add_action(spawn_robot_launch)
-    ld.add_action(referee_node)
+    #ld.add_action(referee_node)
 
     return ld

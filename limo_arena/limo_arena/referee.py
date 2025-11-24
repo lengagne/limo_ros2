@@ -6,30 +6,33 @@ from gazebo_msgs.msg import ModelStates
 from gazebo_msgs.srv import SetEntityState
 from gazebo_msgs.msg import EntityState
 from gazebo_msgs.srv import SpawnEntity
+from geometry_msgs.msg import Wrench
+import random
 
 
 class BallonSpawner(Node):
     def __init__(self):
         super().__init__('ballon_spawner')
         self.spawn_client = self.create_client(SpawnEntity, '/spawn_entity')
+
         while not self.spawn_client.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('Service /spawn_entity not available, waiting...')
 
-        self.ballon_names = [f"ballon_{i}" for i in range(5)]
-        for i in range(5):
+        self.force_publishers = []
+        self.nb_ballon =5
+
+        self.ballon_names = [f"ballon_{i}" for i in range(self.nb_ballon)]
+        for i in range(self.nb_ballon):
             self.spawn_ballon(self.ballon_names[i],-1.0 + 0.5*i)
+            self.force_publishers.append(self.create_publisher(Wrench,f'/{self.ballon_names[i]}/force',10))
+
         
         
-        self.subscription = self.create_subscription(
-            ModelStates,
-            '/gazebo/model_states',
-            self.model_states_callback,
-            10)
-        
+        self.subscription = self.create_subscription( ModelStates, '/gazebo/model_states', self.model_states_callback, 10)
+
         self.subscription_reset = self.create_subscription( Int32, '/reset_score', self.reset_score,10)
         
         self.client = self.create_client(SetEntityState, '/gazebo/set_entity_state')
-        self.ballon_name = "ballon"
         self.goal_line = 1.5  # Coordonnée x de la ligne de but
         
         
@@ -38,19 +41,40 @@ class BallonSpawner(Node):
         
     def model_states_callback(self, msg):
         try:
-            for i in range(5):
+            for i in range(self.nb_ballon):
                 index = msg.name.index(self.ballon_names[i])
                 x = msg.pose[index].position.x
+                y = msg.pose[index].position.y
                 if x > self.goal_line:
                     self.score1 += 1
                     self.reset_ballon(self.ballon_names[i])
+                    return
                     
                 if x < - self.goal_line:
                     self.score2 += 1
-                    self.reset_ballon(self.ballon_names[i])                    
-                    
+                    self.reset_ballon(self.ballon_names[i])
+                    return
+
+                msg_force = Wrench()
+                if y < - 1.25:
+                  msg_force.force.y = -1.0
+                  self.get_logger().info(f"Force appliquée au ballon {i}.")
+
+                if y > 1.25:
+                  msg_force.force.y = 1.0
+                  self.get_logger().info(f"Force appliquée au ballon {i}.")
+
+                self.force_publishers[i] .publish(msg_force)
+
         except ValueError:
-            pass        
+            pass
+
+    def handle_response(self, future):
+        try:
+            response = future.result()
+            self.get_logger().info(f"Force appliquée avec succès : {response.success}")
+        except Exception as e:
+            self.get_logger().error(f"Erreur : {e}")
         
     def reset_ballon(self,name):
         self.get_logger().info('Reset ball {name}')
@@ -58,8 +82,8 @@ class BallonSpawner(Node):
         request = SetEntityState.Request()
         request.state.name = name
         request.state.pose.position.x = 0.0
-        request.state.pose.position.y = 0.0
-        request.state.pose.position.z = 0.5
+        request.state.pose.position.y = 0.0 + random.uniform(-0.5, 0.5)
+        request.state.pose.position.z = 0.5 + random.uniform(-0.5, 0.5)
         self.client.call_async(request)
 
     def reset_score(self,msg):
@@ -71,20 +95,24 @@ class BallonSpawner(Node):
     def spawn_ballon(self, name,y):
         request = SpawnEntity.Request()
         request.name = name
-        request.xml = """
+        request.xml = f"""
         <?xml version="1.0"?>
         <sdf version="1.6">
-          <model name="ballon">
+          <model name="{name}">
             <pose>0 0 0.5 0 0 0</pose>
             <link name="link">
                 <inertial>
-                    <mass>0.45</mass> 
-                    <inertia>
-                    <ixx>0.0018</ixx> 
-                    <iyy>0.0018</iyy>
-                    <izz>0.0018</izz>
+                    <mass>0.3</mass>
+                      <inertia>
+                      <ixx>0.0018</ixx>
+                      <iyy>0.0018</iyy>
+                      <izz>0.0018</izz>
                     </inertia>
-                </inertial>            
+                </inertial>
+                <velocity_decay>
+                  <linear>0.01</linear>
+                  <angular>0.01</angular>
+                </velocity_decay>
               <visual name="visual">
                 <geometry>
                   <sphere>
@@ -104,6 +132,14 @@ class BallonSpawner(Node):
                 </geometry>
               </collision>
             </link>
+            <plugin name="gazebo_ros_force" filename="libgazebo_ros_force.so">
+              <ros>
+                <namespace>/{name}</namespace>
+                <remapping>gazebo_ros_force:=force</remapping>
+              </ros>
+              <link_name>link</link_name>
+              <force_frame>link</force_frame>
+            </plugin>
           </model>
         </sdf>
         """
@@ -111,7 +147,7 @@ class BallonSpawner(Node):
         request.initial_pose = Pose()
         request.initial_pose.position.x = 0.0
         request.initial_pose.position.y = y
-        request.initial_pose.position.z = 0.2
+        request.initial_pose.position.z = 0.1
         request.reference_frame = "world"
 
         future = self.spawn_client.call_async(request)
@@ -123,7 +159,7 @@ class BallonSpawner(Node):
             if response.success:
                 self.get_logger().info('Ballon spawned successfully!')
             else:
-                self.get_logger().error('Failed to spawn ballon: ' + response.status_message)
+                self.get_logger().error('Failed to spawn {name}: ' + response.status_message)
         except Exception as e:
             self.get_logger().error('Service call failed: %r' % (e,))
 
