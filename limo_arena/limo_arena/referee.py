@@ -18,15 +18,11 @@ class BallonSpawner(Node):
         while not self.spawn_client.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('Service /spawn_entity not available, waiting...')
 
-        self.force_publishers = []
         self.nb_ballon =5
 
         self.ballon_names = [f"ballon_{i}" for i in range(self.nb_ballon)]
         for i in range(self.nb_ballon):
             self.spawn_ballon(self.ballon_names[i],-1.0 + 0.5*i)
-            self.force_publishers.append(self.create_publisher(Wrench,f'/{self.ballon_names[i]}/force',10))
-
-        
         
         self.subscription = self.create_subscription( ModelStates, '/gazebo/model_states', self.model_states_callback, 10)
 
@@ -45,6 +41,7 @@ class BallonSpawner(Node):
                 index = msg.name.index(self.ballon_names[i])
                 x = msg.pose[index].position.x
                 y = msg.pose[index].position.y
+                z = msg.pose[index].position.z
                 if x > self.goal_line:
                     self.score1 += 1
                     self.reset_ballon(self.ballon_names[i])
@@ -55,16 +52,21 @@ class BallonSpawner(Node):
                     self.reset_ballon(self.ballon_names[i])
                     return
 
-                msg_force = Wrench()
                 if y < - 1.25:
-                  msg_force.force.y = -1.0
-                  self.get_logger().info(f"Force appliquée au ballon {i}.")
+                  request = SetEntityState.Request()
+                  request.state.name = self.ballon_names[i]
+                  request.state.pose.position.x = x
+                  request.state.pose.position.y = y +0.01
+                  request.state.pose.position.z = z
+                  self.client.call_async(request)
 
                 if y > 1.25:
-                  msg_force.force.y = 1.0
-                  self.get_logger().info(f"Force appliquée au ballon {i}.")
-
-                self.force_publishers[i] .publish(msg_force)
+                  request = SetEntityState.Request()
+                  request.state.name = self.ballon_names[i]
+                  request.state.pose.position.x = x
+                  request.state.pose.position.y = y -0.01
+                  request.state.pose.position.z = z
+                  self.client.call_async(request)
 
         except ValueError:
             pass
@@ -110,8 +112,8 @@ class BallonSpawner(Node):
                     </inertia>
                 </inertial>
                 <velocity_decay>
-                  <linear>0.01</linear>
-                  <angular>0.01</angular>
+                  <linear>0.001</linear>
+                  <angular>0.001</angular>
                 </velocity_decay>
               <visual name="visual">
                 <geometry>
@@ -132,14 +134,6 @@ class BallonSpawner(Node):
                 </geometry>
               </collision>
             </link>
-            <plugin name="gazebo_ros_force" filename="libgazebo_ros_force.so">
-              <ros>
-                <namespace>/{name}</namespace>
-                <remapping>gazebo_ros_force:=force</remapping>
-              </ros>
-              <link_name>link</link_name>
-              <force_frame>link</force_frame>
-            </plugin>
           </model>
         </sdf>
         """
