@@ -3,10 +3,16 @@
 <robot name="limo_four_diff" xmlns:xacro="http://ros.org/wiki/xacro">
 
 
+
     <xacro:include filename="$(find limo_simulation)/urdf/limo_xacro.xacro" />
     <!-- <xacro:include filename="$(find limo_simulation)/urdf/limo_four_diff_2.gazebo" /> -->
 
+
+
+
     <!-- Variables -->
+    <xacro:arg name="robot_namespace" default="" />
+
     <xacro:property name="M_PI" value="3.14159"/>
 
     <!-- Vehicle Geometries -->
@@ -162,11 +168,11 @@
           </z>
         </linear_acceleration>
       </imu>
-      <plugin name="two_wheeled_robot_imu" filename="libgazebo_ros_imu_sensor.so">
+      <plugin name="$(arg robot_namespace)_imu" filename="libgazebo_ros_imu_sensor.so">
         <initial_orientation_as_reference>false</initial_orientation_as_reference>
         <frame_name>imu_link</frame_name>
         <ros>
-          <namespace>/robot1/imu</namespace>
+          <robot_namespace>$(arg robot_namespace)/imu</robot_namespace>
           <remapping>~/out:=data</remapping>
         </ros>
       </plugin>
@@ -197,9 +203,9 @@
           <stddev>0.01</stddev>
         </noise>
       </ray>
-    <plugin name="scan" filename="libgazebo_ros_ray_sensor.so">
+    <plugin name="$(arg robot_namespace)_scan" filename="libgazebo_ros_ray_sensor.so">
       <ros>
-        <remapping>~/out:=/robot1/scan</remapping>
+        <remapping>~/out:=$(arg robot_namespace)/scan</remapping>
       </ros>
       <output_type>sensor_msgs/LaserScan</output_type>
       <frame_name>laser_link</frame_name>
@@ -244,7 +250,7 @@
         <maxContacts value="64"/>
     </gazebo>
     <gazebo>
-        <plugin name="diff_drive" filename="libgazebo_ros_diff_drive.so">
+        <plugin name="$(arg robot_namespace)_diff_drive" filename="libgazebo_ros_diff_drive.so">
         <update_rate>50</update_rate>
         <num_wheel_pairs>2</num_wheel_pairs>
         <left_joint>front_left_wheel </left_joint>
@@ -264,8 +270,8 @@
         <robot_base_frame>base_footprint</robot_base_frame>
         <odometry_source>1</odometry_source>
         <ros>
-            <remapping>odom:=/robot1/odometry</remapping>
-            <remapping>cmd_vel:=/robot1/cmd_vel</remapping>
+            <remapping>odom:=$(arg robot_namespace)/odometry</remapping>
+            <remapping>cmd_vel:=$(arg robot_namespace)/cmd_vel</remapping>
         </ros>
         </plugin> 
     </gazebo>
