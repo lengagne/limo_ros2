@@ -26,7 +26,9 @@ class BallonSpawner(Node):
         
         self.subscription = self.create_subscription( ModelStates, '/gazebo/model_states', self.model_states_callback, 10)
 
-        self.subscription_reset = self.create_subscription( Int32, '/reset_score', self.reset_score,10)
+        self.subscription_reset = self.create_subscription( Int32, '/referee/reset_score', self.reset_score,10)
+        self.reset_pub1 = self.create_publisher(Int32, 'referee/score1', 10)
+        self.reset_pub2 = self.create_publisher(Int32, 'referee/score2', 10)
         
         self.client = self.create_client(SetEntityState, '/gazebo/set_entity_state')
         self.goal_line = 1.5  # Coordonnée x de la ligne de but
@@ -45,11 +47,13 @@ class BallonSpawner(Node):
                 if x > self.goal_line:
                     self.score1 += 1
                     self.reset_ballon(self.ballon_names[i])
+                    self.reset_pub1.publish(Int32(data=self.score1))
                     return
                     
                 if x < - self.goal_line:
                     self.score2 += 1
                     self.reset_ballon(self.ballon_names[i])
+                    self.reset_pub2.publish(Int32(data=self.score2))
                     return
 
                 if y < - 1.25:
@@ -93,6 +97,39 @@ class BallonSpawner(Node):
         self.score1 = 0
         self.score2 = 0
         self.get_logger().info('Score : %d : %d' %(self.score1, self.score2))
+        self.reset_pub1.publish(Int32(data=self.score1))
+        self.reset_pub2.publish(Int32(data=self.score2))
+
+        request = SetEntityState.Request()
+        request.state.name = "limo1"
+        request.state.pose.position.x = 1.5
+        request.state.pose.position.y = 0.0
+        request.state.pose.position.z = 0.0
+        request.state.pose.orientation.x = 0.0
+        request.state.pose.orientation.y = 0.0
+        request.state.pose.orientation.z = 1.0
+        request.state.pose.orientation.w = 0.0
+        self.client.call_async(request)
+
+
+        request.state.name = "limo_four_diff"
+        self.client.call_async(request)
+
+
+        request = SetEntityState.Request()
+        request.state.name = "limo2"
+        request.state.pose.position.x = -1.5
+        request.state.pose.position.y = 0.0
+        request.state.pose.position.z = 0.0
+        request.state.pose.orientation.x = 0.0
+        request.state.pose.orientation.y = 0.0
+        request.state.pose.orientation.z = 0.0
+        request.state.pose.orientation.w = 1.0
+        self.client.call_async(request)
+
+        for i in range(self.nb_ballon):
+            self.update_ballon(self.ballon_names[i],-1.0 + 0.5*i)
+
 
     def spawn_ballon(self, name,y):
         request = SpawnEntity.Request()
@@ -156,6 +193,19 @@ class BallonSpawner(Node):
                 self.get_logger().error('Failed to spawn {name}: ' + response.status_message)
         except Exception as e:
             self.get_logger().error('Service call failed: %r' % (e,))
+
+    def update_ballon(self, name,y):
+        request = SetEntityState.Request()
+        request.state.name = name
+        request.state.pose.position.x = 0.0
+        request.state.pose.position.y = y
+        request.state.pose.position.z = 0.0
+        request.state.pose.orientation.x = 0.0
+        request.state.pose.orientation.y = 0.0
+        request.state.pose.orientation.z = 0.0
+        request.state.pose.orientation.w = 1.0
+        self.client.call_async(request)
+
 
 def main(args=None):
     rclpy.init(args=args)

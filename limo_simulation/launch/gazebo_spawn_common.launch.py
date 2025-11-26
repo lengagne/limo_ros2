@@ -77,12 +77,6 @@ def generate_launch_description():
         )
     )
 
-
-
-
-    log_X = LogInfo(msg=['La valeur de spawn_x_val est : ', spawn_x_val])
-    log_namespace = LogInfo(msg=['La valeur de robot_name est : ', robot_name])
-
     robot_description = Command([
         'xacro ', urdf_model,
         ' robot_namespace:=', robot_name,
@@ -121,8 +115,6 @@ def generate_launch_description():
     # Add all actions to the launch description
     ld.add_action(start_robot_state_publisher_cmd)
     ld.add_action(spawn_entity_cmd)
-    ld.add_action(log_X)
-    ld.add_action(log_namespace)
 
     return ld
 

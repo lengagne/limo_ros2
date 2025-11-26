@@ -24,6 +24,7 @@ setup(
     entry_points={
         'console_scripts': [
             'referee = limo_arena.referee:main',
+            'scoreboard = limo_arena.scoreboard:main',
         ],
     },
 )

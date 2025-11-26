@@ -101,7 +101,9 @@ def generate_launch_description():
             os.path.join(pkg_gazebo_ros.find('gazebo_ros'), 'launch', 'gzserver.launch.py')
         ),
         condition=IfCondition(use_simulator),
-        launch_arguments={'world': world_path}.items()
+        launch_arguments={'world': world_path,
+                          'use_sim_time' : use_sim_time,
+                          }.items()
     )
 
     # Start Gazebo client
